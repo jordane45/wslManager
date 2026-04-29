@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($env:PATH -split \";\" | ForEach-Object { Write-Output $_ }; echo \"---\"; where.exe flutter 2>&1; where.exe dart 2>&1)",
+      "PowerShell(scoop list 2>&1)",
+      "PowerShell(head -30)",
+      "PowerShell(Get-ChildItem \"C:\\\\Program Files\\\\Microsoft Visual Studio\" -ErrorAction SilentlyContinue; Get-ChildItem \"${env:ProgramFiles\\(x86\\)}\\\\Microsoft Visual Studio\" -ErrorAction SilentlyContinue)",
+      "PowerShell(cmd /c \"dir \"\"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\18\"\" /s /b 2>&1\")",
+      "PowerShell(Get-Command python3, py, python -ErrorAction SilentlyContinue)",
+      "PowerShell(py --version 2>&1)",
+      "PowerShell(py -c \"import sys; print\\(sys.executable\\)\" 2>&1)"
+    ]
+  }
+}
