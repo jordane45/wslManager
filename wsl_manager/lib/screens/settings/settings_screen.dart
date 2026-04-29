@@ -71,12 +71,8 @@ class SettingsScreen extends ConsumerWidget {
                         value: 'light',
                         label: Text('Clair'),
                         icon: Icon(Icons.brightness_high)),
-                    ButtonSegment(
-                        value: 'dark',
-                        label: Text('Sombre'),
-                        icon: Icon(Icons.brightness_2)),
                   ],
-                  selected: {cfg.theme},
+                  selected: {cfg.theme == 'dark' ? 'system' : cfg.theme},
                   onSelectionChanged: (v) =>
                       _save(ref, cfg.copyWith(theme: v.first)),
                 ),

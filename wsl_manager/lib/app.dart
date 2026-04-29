@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'providers/config_provider.dart';
 import 'screens/dashboard/dashboard_screen.dart';
 import 'screens/instance_detail/instance_detail_screen.dart';
 import 'screens/wizard/create_wizard_screen.dart';
@@ -29,11 +31,17 @@ final _router = GoRouter(
   ],
 );
 
-class App extends StatelessWidget {
+class App extends ConsumerWidget {
   const App({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeConfig = ref.watch(configProvider).valueOrNull?.theme ?? 'system';
+    final themeMode = switch (themeConfig) {
+      'light' => ThemeMode.light,
+      _ => ThemeMode.system,
+    };
+
     return MaterialApp.router(
       title: 'WSL Manager',
       debugShowCheckedModeBanner: false,
@@ -45,15 +53,7 @@ class App extends StatelessWidget {
         useMaterial3: true,
         fontFamily: 'Segoe UI',
       ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF0078D4),
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-        fontFamily: 'Segoe UI',
-      ),
-      themeMode: ThemeMode.system,
+      themeMode: themeMode,
       routerConfig: _router,
     );
   }
