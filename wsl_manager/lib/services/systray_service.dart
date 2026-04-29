@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:path/path.dart' as p;
 import 'package:system_tray/system_tray.dart';
 import '../models/wsl_instance.dart';
 
@@ -14,11 +16,21 @@ class SystrayService {
   VoidCallback? onQuit;
   void Function(String name, bool start)? onToggleInstance;
 
+  String get _iconPath {
+    if (kReleaseMode) {
+      return p.join(
+        p.dirname(Platform.resolvedExecutable),
+        'data', 'flutter_assets', 'assets', 'icons', 'app_icon.ico',
+      );
+    }
+    return 'assets/icons/app_icon.ico';
+  }
+
   Future<void> init() async {
     try {
       await _tray.initSystemTray(
         title: 'WSL Manager',
-        iconPath: 'assets/icons/app_icon.ico',
+        iconPath: _iconPath,
         toolTip: 'WSL Manager',
       );
       _tray.registerSystemTrayEventHandler((eventName) {

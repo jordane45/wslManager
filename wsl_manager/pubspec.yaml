@@ -64,4 +64,5 @@ flutter:
 
   assets:
     - assets/data/official_distros.json
+    - assets/icons/app_icon.ico
     - assets/icons/distros/

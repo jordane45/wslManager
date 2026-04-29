@@ -4,8 +4,9 @@
 
 $ErrorActionPreference = 'Stop'
 $ProjectRoot = Split-Path $PSScriptRoot -Parent
-$BuildDir = Join-Path $ProjectRoot 'build\windows\x64\runner\Release'
-$DistDir  = Join-Path $ProjectRoot 'dist'
+$BuildDir    = Join-Path $ProjectRoot 'build\windows\x64\runner\Release'
+$DestDir     = Join-Path $ProjectRoot 'dist\WSLManager'
+$ZipPath     = Join-Path $ProjectRoot 'dist\WSLManager_portable.zip'
 
 Write-Host '==> flutter build windows --release' -ForegroundColor Cyan
 Push-Location $ProjectRoot
@@ -17,11 +18,25 @@ if (-not (Test-Path $BuildDir)) {
     exit 1
 }
 
-New-Item -ItemType Directory -Force -Path $DistDir | Out-Null
-$ZipPath = Join-Path $DistDir 'WSLManager_portable.zip'
+# Clean previous dist
+if (Test-Path $DestDir) { Remove-Item $DestDir -Recurse -Force }
+New-Item -ItemType Directory -Force -Path $DestDir | Out-Null
 
+Write-Host "==> Copying to $DestDir" -ForegroundColor Cyan
+Copy-Item -Recurse "$BuildDir\*" $DestDir
+
+# Rename executable to WSLManager.exe
+$srcExe  = Join-Path $DestDir 'wsl_manager.exe'
+$destExe = Join-Path $DestDir 'WSLManager.exe'
+if (Test-Path $srcExe) {
+    Rename-Item $srcExe $destExe
+    Write-Host "==> Renamed wsl_manager.exe -> WSLManager.exe"
+}
+
+# Create portable ZIP
+if (Test-Path $ZipPath) { Remove-Item $ZipPath -Force }
 Write-Host "==> Creating $ZipPath" -ForegroundColor Cyan
-Compress-Archive -Path "$BuildDir\*" -DestinationPath $ZipPath -Force
+Compress-Archive -Path $DestDir -DestinationPath $ZipPath
 
-$SizeKb = [math]::Round((Get-Item $ZipPath).Length / 1KB)
-Write-Host "==> Done: $ZipPath ($SizeKb KB)" -ForegroundColor Green
+$SizeMb = [math]::Round((Get-Item $ZipPath).Length / 1MB, 1)
+Write-Host "==> Done: $ZipPath ($SizeMb MB)" -ForegroundColor Green
