@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/wsl_instance.dart';
 import '../../providers/instances_provider.dart';
-import '../../widgets/custom_title_bar.dart';
 import '../../widgets/uac_banner.dart';
 import 'widgets/global_stats_bar.dart';
 import 'widgets/instance_card.dart';
@@ -24,7 +23,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
     return Column(
       children: [
-        const CustomTitleBar(),
         const UacBanner(),
         const GlobalStatsBar(),
         Padding(

@@ -118,16 +118,26 @@ class _AppShellState extends ConsumerState<AppShell> with WindowListener {
                   backgroundColor: Colors.transparent,
                   selectedIndex: idx,
                   labelType: NavigationRailLabelType.all,
+                  minWidth: 72,
+                  useIndicator: true,
+                  indicatorColor: const Color(0xFF0078D4).withAlpha(40),
+                  selectedLabelTextStyle: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF0078D4),
+                  ),
+                  unselectedLabelTextStyle: const TextStyle(fontSize: 11),
+                  selectedIconTheme: const IconThemeData(
+                    color: Color(0xFF0078D4),
+                    size: 22,
+                  ),
+                  unselectedIconTheme: const IconThemeData(size: 22),
                   onDestinationSelected: (i) {
                     switch (i) {
-                      case 0:
-                        context.go('/');
-                      case 1:
-                        context.go('/templates');
-                      case 2:
-                        context.go('/snapshots');
-                      case 3:
-                        context.go('/settings');
+                      case 0: context.go('/');
+                      case 1: context.go('/templates');
+                      case 2: context.go('/snapshots');
+                      case 3: context.go('/settings');
                     }
                   },
                   destinations: const [

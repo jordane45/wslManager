@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/wsl_instance.dart';
 import '../../providers/instances_provider.dart';
-import '../../widgets/custom_title_bar.dart';
 import '../../widgets/status_badge.dart';
 import 'widgets/info_panel.dart';
 import 'widgets/actions_panel.dart';
@@ -35,7 +34,6 @@ class InstanceDetailScreen extends ConsumerWidget {
       length: 5,
       child: Column(
         children: [
-          const CustomTitleBar(),
           _InstanceHeader(instance: instance),
           const TabBar(
             tabs: [
