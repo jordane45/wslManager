@@ -74,24 +74,24 @@ jobs:
       # ── GitHub Release (tags V* uniquement) ───────────────────────────────
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/V')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: wsl_manager/dist/WSLManager_portable.zip
-          name: "WSL Manager ${{ github.ref_name }}"
-          body: |
-            ## WSL Manager ${{ github.ref_name }}
-
-            ### Installation
-            1. Télécharger `WSLManager_portable.zip`
-            2. Extraire dans le dossier de votre choix
-            3. Lancer `WSLManager.exe`
-
-            > Aucune installation requise — application portable.
-            > Requiert Windows 11 x64 avec WSL2.
-
-            ### Licence
-            © Jordane Reynet — [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/)
-          draft: false
-          prerelease: false
+        shell: pwsh
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $tag  = "${{ github.ref_name }}"
+          $zip  = "wsl_manager/dist/WSLManager_portable.zip"
+          $body = @"
+          ## WSL Manager $tag
+
+          ### Installation
+          1. Télécharger ``WSLManager_portable.zip``
+          2. Extraire dans le dossier de votre choix
+          3. Lancer ``WSLManager.exe``
+
+          > Aucune installation requise — application portable.
+          > Requiert Windows 11 x64 avec WSL2.
+
+          ### Licence
+          © Jordane Reynet — [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/)
+          "@
+          gh release create $tag $zip --title "WSL Manager $tag" --notes $body
