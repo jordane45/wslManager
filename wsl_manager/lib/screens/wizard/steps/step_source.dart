@@ -127,18 +127,23 @@ class _StepSourceState extends ConsumerState<StepSource> {
                   widget.state.copyWith(sourceType: SourceType.template)),
           child: type == SourceType.template
               ? Column(
-                  children: templates
-                      .map((t) => RadioListTile<String>(
-                            dense: true,
-                            title: Text(t.name),
-                            subtitle: Text(
-                                '${t.sizeBytes ~/ (1024 * 1024)} Mo'),
-                            value: t.id,
-                            groupValue: widget.state.templateId,
-                            onChanged: (v) => widget.onChanged(
-                                widget.state.copyWith(templateId: v)),
-                          ))
-                      .toList(),
+                  children: templates.map((t) {
+                    final sel = widget.state.templateId == t.id;
+                    return ListTile(
+                      dense: true,
+                      leading: Icon(
+                        sel ? Icons.check_circle : Icons.circle_outlined,
+                        color: sel
+                            ? Theme.of(context).colorScheme.primary
+                            : null,
+                        size: 20,
+                      ),
+                      title: Text(t.name),
+                      subtitle: Text('${t.sizeBytes ~/ (1024 * 1024)} Mo'),
+                      onTap: () => widget.onChanged(
+                          widget.state.copyWith(templateId: t.id)),
+                    );
+                  }).toList(),
                 )
               : null,
         ),

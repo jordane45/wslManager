@@ -1,32 +1,92 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:window_manager/window_manager.dart';
+import '../providers/config_provider.dart';
+import '../providers/instances_provider.dart';
+import '../services/systray_service.dart';
+import '../services/wsl_service.dart';
 import 'custom_title_bar.dart';
 
-class AppShell extends StatefulWidget {
+class AppShell extends ConsumerStatefulWidget {
   final Widget child;
   const AppShell({super.key, required this.child});
 
   @override
-  State<AppShell> createState() => _AppShellState();
+  ConsumerState<AppShell> createState() => _AppShellState();
 }
 
-class _AppShellState extends State<AppShell> with WindowListener {
+class _AppShellState extends ConsumerState<AppShell> with WindowListener {
+  bool _hasShownTrayHint = false;
+
   @override
   void initState() {
     super.initState();
     windowManager.addListener(this);
+    _initSystray();
   }
 
   @override
   void dispose() {
     windowManager.removeListener(this);
+    SystrayService.instance.destroy();
     super.dispose();
+  }
+
+  Future<void> _initSystray() async {
+    final service = SystrayService.instance;
+
+    service.onShowWindow = () async {
+      await windowManager.show();
+      await windowManager.focus();
+    };
+
+    service.onQuit = () async {
+      await windowManager.setPreventClose(false);
+      await windowManager.close();
+    };
+
+    service.onToggleInstance = (name, start) async {
+      if (start) {
+        await WslService.instance.startInstance(name);
+      } else {
+        await WslService.instance.stopInstance(name);
+      }
+      ref.read(instancesProvider.notifier).refresh();
+    };
+
+    await service.init();
   }
 
   @override
   void onWindowClose() async {
-    await windowManager.hide();
+    final config = ref.read(configProvider).valueOrNull;
+    final minimizeToTray = config?.minimizeToTray ?? true;
+
+    if (minimizeToTray) {
+      await windowManager.hide();
+      if (!_hasShownTrayHint && mounted) {
+        _hasShownTrayHint = true;
+        // Show hint via snackbar before hiding (shown briefly before window hides)
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('WSL Manager tourne en arrière-plan dans le systray.'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    } else {
+      await windowManager.setPreventClose(false);
+      await windowManager.close();
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Rebuild tray menu when instances change
+    final instances = ref.watch(instancesProvider).valueOrNull ?? [];
+    SystrayService.instance.updateMenu(instances);
   }
 
   int _selectedIndex(BuildContext context) {
@@ -40,6 +100,11 @@ class _AppShellState extends State<AppShell> with WindowListener {
 
   @override
   Widget build(BuildContext context) {
+    // Keep tray in sync with provider changes
+    ref.listen(instancesProvider, (_, next) {
+      SystrayService.instance.updateMenu(next.valueOrNull ?? []);
+    });
+
     final idx = _selectedIndex(context);
     return Scaffold(
       backgroundColor: Colors.transparent,

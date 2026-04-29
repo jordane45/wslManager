@@ -8,7 +8,8 @@
       "PowerShell(cmd /c \"dir \"\"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\18\"\" /s /b 2>&1\")",
       "PowerShell(Get-Command python3, py, python -ErrorAction SilentlyContinue)",
       "PowerShell(py --version 2>&1)",
-      "PowerShell(py -c \"import sys; print\\(sys.executable\\)\" 2>&1)"
+      "PowerShell(py -c \"import sys; print\\(sys.executable\\)\" 2>&1)",
+      "Bash(flutter analyze *)"
     ]
   }
 }

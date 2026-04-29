@@ -59,19 +59,28 @@ class SettingsScreen extends ConsumerWidget {
             ]),
             const SizedBox(height: 16),
             _Section(title: 'Apparence', children: [
-              ...['system', 'light', 'dark'].map((t) => RadioListTile<String>(
-                    dense: true,
-                    title: Text(switch (t) {
-                      'system' => 'Système',
-                      'light' => 'Clair',
-                      'dark' => 'Sombre',
-                      _ => t,
-                    }),
-                    value: t,
-                    groupValue: cfg.theme,
-                    onChanged: (v) =>
-                        _save(ref, cfg.copyWith(theme: v)),
-                  )),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: SegmentedButton<String>(
+                  segments: const [
+                    ButtonSegment(
+                        value: 'system',
+                        label: Text('Système'),
+                        icon: Icon(Icons.brightness_auto)),
+                    ButtonSegment(
+                        value: 'light',
+                        label: Text('Clair'),
+                        icon: Icon(Icons.brightness_high)),
+                    ButtonSegment(
+                        value: 'dark',
+                        label: Text('Sombre'),
+                        icon: Icon(Icons.brightness_2)),
+                  ],
+                  selected: {cfg.theme},
+                  onSelectionChanged: (v) =>
+                      _save(ref, cfg.copyWith(theme: v.first)),
+                ),
+              ),
             ]),
             const SizedBox(height: 16),
             _Section(title: 'Comportement', children: [
@@ -91,11 +100,11 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ]),
             const SizedBox(height: 16),
-            _Section(title: 'À propos', children: [
+            const _Section(title: 'À propos', children: [
               ListTile(
                 dense: true,
-                title: const Text('Version'),
-                trailing: const Text('1.0.0',
+                title: Text('Version'),
+                trailing: Text('1.0.0',
                     style: TextStyle(fontWeight: FontWeight.w500)),
               ),
             ]),

@@ -34,7 +34,7 @@ class StepSummary extends StatelessWidget {
                 _Row('Source', _sourceLabel),
                 _Row('Nom de l\'instance', state.instanceName),
                 _Row('Utilisateur', state.username),
-                _Row('Mot de passe', '••••••••'),
+                const _Row('Mot de passe', '••••••••'),
                 _Row('Chemin d\'installation', state.installPath),
               ],
             ),
