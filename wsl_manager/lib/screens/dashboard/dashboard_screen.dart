@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../models/wsl_instance.dart';
 import '../../providers/instances_provider.dart';
 import '../../widgets/uac_banner.dart';
@@ -55,6 +56,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       value: _SortMode.version, child: Text('Version WSL')),
                 ],
                 onChanged: (v) => setState(() => _sort = v!),
+              ),
+              const SizedBox(width: 12),
+              FilledButton.icon(
+                icon: const Icon(Icons.add, size: 18),
+                label: const Text('Nouvelle instance'),
+                onPressed: () => context.go('/create'),
               ),
             ],
           ),
