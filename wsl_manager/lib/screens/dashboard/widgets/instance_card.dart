@@ -153,37 +153,111 @@ class _QuickActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final stopped = instance.state == WslInstanceState.stopped;
+    final running = instance.state == WslInstanceState.running;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (instance.state == WslInstanceState.stopped)
-          IconButton(
-            icon: const Icon(Icons.play_arrow),
+        // Start / Stop
+        if (stopped)
+          _ActionButton(
+            icon: Icons.play_arrow_rounded,
             tooltip: 'Démarrer',
+            color: const Color(0xFF22C55E),
             onPressed: () => ref.read(instancesProvider.notifier).start(instance.name),
           ),
-        if (instance.state == WslInstanceState.running)
-          IconButton(
-            icon: const Icon(Icons.stop),
+        if (running)
+          _ActionButton(
+            icon: Icons.stop_rounded,
             tooltip: 'Arrêter',
+            color: Colors.orange,
             onPressed: () => ref.read(instancesProvider.notifier).stop(instance.name),
           ),
-        IconButton(
-          icon: const Icon(Icons.code),
-          tooltip: 'VSCode',
-          onPressed: () => WslService.instance.openInVsCode(instance.name),
-        ),
-        IconButton(
-          icon: const Icon(Icons.terminal),
-          tooltip: 'Terminal',
-          onPressed: () => WslService.instance.openInTerminal(instance.name),
-        ),
-        IconButton(
-          icon: const Icon(Icons.folder_open),
-          tooltip: 'Explorateur',
-          onPressed: () => WslService.instance.openInExplorer(instance.name),
+        if (!stopped && !running)
+          const SizedBox(width: 40),
+
+        const SizedBox(width: 4),
+
+        // "Ouvrir dans…" menu
+        PopupMenuButton<String>(
+          tooltip: 'Ouvrir dans…',
+          icon: const Icon(Icons.open_in_new, size: 20),
+          itemBuilder: (_) => [
+            const PopupMenuItem(
+              value: 'vscode',
+              child: ListTile(
+                dense: true,
+                leading: Icon(Icons.code, size: 18),
+                title: Text('VSCode'),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+            const PopupMenuItem(
+              value: 'terminal',
+              child: ListTile(
+                dense: true,
+                leading: Icon(Icons.terminal, size: 18),
+                title: Text('Terminal'),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+            const PopupMenuItem(
+              value: 'explorer',
+              child: ListTile(
+                dense: true,
+                leading: Icon(Icons.folder_open, size: 18),
+                title: Text('Explorateur'),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+          ],
+          onSelected: (v) {
+            switch (v) {
+              case 'vscode':
+                WslService.instance.openInVsCode(instance.name);
+              case 'terminal':
+                WslService.instance.openInTerminal(instance.name);
+              case 'explorer':
+                WslService.instance.openInExplorer(instance.name);
+            }
+          },
         ),
       ],
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  final IconData icon;
+  final String tooltip;
+  final Color color;
+  final VoidCallback onPressed;
+  const _ActionButton({
+    required this.icon,
+    required this.tooltip,
+    required this.color,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: onPressed,
+        child: Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: color.withAlpha(25),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: color.withAlpha(80)),
+          ),
+          child: Icon(icon, size: 20, color: color),
+        ),
+      ),
     );
   }
 }
