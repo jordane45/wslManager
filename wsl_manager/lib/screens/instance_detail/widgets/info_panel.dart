@@ -1,33 +1,51 @@
 import 'package:flutter/material.dart';
-import '../../../models/wsl_instance.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class InfoPanel extends StatelessWidget {
+import '../../../models/wsl_instance.dart';
+import '../../../providers/monitoring_provider.dart';
+
+class InfoPanel extends ConsumerWidget {
   final WslInstance instance;
   const InfoPanel({super.key, required this.instance});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final monitoring = ref.watch(monitoringProvider);
+    final data = monitoring.valueOrNull?[instance.name];
+    final unavailable = instance.state == WslInstanceState.running
+        ? 'En attente...'
+        : 'Non disponible';
+
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
         _InfoSection(title: 'Général', rows: [
           _InfoRow('Nom', instance.name),
           _InfoRow('État', instance.state.name),
-          _InfoRow('Version WSL', instance.version == WslVersion.wsl2 ? 'WSL 2' : 'WSL 1'),
+          _InfoRow(
+            'Version WSL',
+            instance.version == WslVersion.wsl2 ? 'WSL 2' : 'WSL 1',
+          ),
           _InfoRow('Instance par défaut', instance.isDefault ? 'Oui' : 'Non'),
         ]),
         const SizedBox(height: 16),
         _InfoSection(title: 'Réseau', rows: [
-          _InfoRow('Adresse IP', instance.ipAddress ?? '—'),
+          _InfoRow('Adresse IP', data?.ipAddress ?? unavailable),
         ]),
         const SizedBox(height: 16),
         _InfoSection(title: 'Ressources', rows: [
-          _InfoRow('CPU', instance.cpuPercent != null
-              ? '${instance.cpuPercent!.toStringAsFixed(1)} %'
-              : '—'),
-          _InfoRow('RAM utilisée', instance.ramUsedMb != null
-              ? '${instance.ramUsedMb} Mo / ${instance.ramTotalMb} Mo'
-              : '—'),
+          _InfoRow(
+            'CPU',
+            data != null
+                ? '${data.cpuPercent.toStringAsFixed(1)} %'
+                : unavailable,
+          ),
+          _InfoRow(
+            'RAM utilisée',
+            data != null
+                ? '${data.ramUsedMb} Mo / ${data.ramTotalMb} Mo'
+                : unavailable,
+          ),
         ]),
       ],
     );
@@ -47,11 +65,13 @@ class _InfoSection extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleSmall
-                    ?.copyWith(fontWeight: FontWeight.w600)),
+            Text(
+              title,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleSmall
+                  ?.copyWith(fontWeight: FontWeight.w600),
+            ),
             const Divider(height: 16),
             ...rows,
           ],
@@ -74,14 +94,19 @@ class _InfoRow extends StatelessWidget {
         children: [
           SizedBox(
             width: 160,
-            child: Text(label,
-                style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontSize: 13)),
+            child: Text(
+              label,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontSize: 13,
+              ),
+            ),
           ),
           Expanded(
-            child: Text(value,
-                style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
+            child: Text(
+              value,
+              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+            ),
           ),
         ],
       ),

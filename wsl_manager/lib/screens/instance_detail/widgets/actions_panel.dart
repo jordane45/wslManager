@@ -26,18 +26,32 @@ class ActionsPanel extends ConsumerWidget {
             _ActionTile(
               icon: Icons.play_arrow,
               label: 'Démarrer',
-              onTap: () => ref.read(instancesProvider.notifier).start(instance.name),
+              onTap: () => _runInstanceAction(
+                context,
+                () => ref.read(instancesProvider.notifier).start(instance.name),
+                'Instance demarree',
+              ),
             ),
           if (isRunning)
             _ActionTile(
               icon: Icons.stop,
               label: 'Arrêter',
-              onTap: () => ref.read(instancesProvider.notifier).stop(instance.name),
+              onTap: () => _runInstanceAction(
+                context,
+                () => ref.read(instancesProvider.notifier).stop(instance.name),
+                'Instance arretee',
+              ),
             ),
           _ActionTile(
             icon: Icons.star_outline,
             label: 'Définir comme défaut',
-            onTap: () => ref.read(instancesProvider.notifier).setDefault(instance.name),
+            onTap: () => _runInstanceAction(
+              context,
+              () => ref
+                  .read(instancesProvider.notifier)
+                  .setDefault(instance.name),
+              'Instance definie par defaut',
+            ),
           ),
         ]),
         const SizedBox(height: 16),
@@ -88,13 +102,6 @@ class ActionsPanel extends ConsumerWidget {
             label: 'Réinitialiser le mot de passe',
             onTap: () => _resetPassword(context),
           ),
-          _ActionTile(
-            icon: Icons.swap_horiz,
-            label: instance.version == WslVersion.wsl2
-                ? 'Convertir en WSL 1'
-                : 'Convertir en WSL 2',
-            onTap: () => _convertVersion(context),
-          ),
         ]),
         const SizedBox(height: 16),
         _ActionSection(title: 'Zone dangereuse', actions: [
@@ -126,7 +133,8 @@ class ActionsPanel extends ConsumerWidget {
           update(0, StepStatus.running);
           update(0, StepStatus.done);
           update(1, StepStatus.running);
-          await TemplateService.instance.createFromInstance(instance.name, name, '');
+          await TemplateService.instance
+              .createFromInstance(instance.name, name, '');
           update(1, StepStatus.done);
           update(2, StepStatus.running);
           await ref.read(templatesProvider.notifier).refresh();
@@ -134,6 +142,28 @@ class ActionsPanel extends ConsumerWidget {
         },
       ),
     );
+  }
+
+  Future<void> _runInstanceAction(
+    BuildContext context,
+    Future<void> Function() action,
+    String successMessage,
+  ) async {
+    try {
+      await action();
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(successMessage)),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
   }
 
   Future<void> _createSnapshot(BuildContext context, WidgetRef ref) async {
@@ -150,7 +180,8 @@ class ActionsPanel extends ConsumerWidget {
         ],
         task: (update) async {
           update(0, StepStatus.running);
-          await SnapshotService.instance.createSnapshot(instance.name, name, '');
+          await SnapshotService.instance
+              .createSnapshot(instance.name, name, '');
           update(0, StepStatus.done);
           update(1, StepStatus.running);
           await ref.read(snapshotsProvider.notifier).refresh();
@@ -182,8 +213,8 @@ class ActionsPanel extends ConsumerWidget {
           update(0, StepStatus.running);
           update(0, StepStatus.done);
           update(1, StepStatus.running);
-          await WslService.instance.duplicateInstance(
-              instance.name, newName, 'C:\\WSL\\$newName');
+          await WslService.instance
+              .duplicateInstance(instance.name, newName, 'C:\\WSL\\$newName');
           update(1, StepStatus.done);
           update(2, StepStatus.running);
           await ref.read(instancesProvider.notifier).refresh();
@@ -231,7 +262,8 @@ class ActionsPanel extends ConsumerWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Entrez le nom d\'utilisateur et le nouveau mot de passe.'),
+            const Text(
+                'Entrez le nom d\'utilisateur et le nouveau mot de passe.'),
             const SizedBox(height: 12),
             TextField(
               controller: controller,
@@ -252,32 +284,9 @@ class ActionsPanel extends ConsumerWidget {
     );
   }
 
-  Future<void> _convertVersion(BuildContext context) async {
-    final targetVersion = instance.version == WslVersion.wsl2 ? 1 : 2;
-    final confirmed = await showConfirmDialog(context,
-        title: 'Convertir en WSL $targetVersion',
-        message:
-            'La conversion peut prendre plusieurs minutes. L\'instance sera arrêtée.',
-        confirmLabel: 'Convertir');
-    if (!confirmed || !context.mounted) return;
-    await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => ProgressDialog(
-        title: 'Conversion WSL $targetVersion',
-        steps: [ProgressStep('Conversion en cours...')],
-        task: (update) async {
-          update(0, StepStatus.running);
-          await WslService.instance.setVersion(instance.name, targetVersion);
-          update(0, StepStatus.done);
-        },
-      ),
-    );
-  }
-
   Future<void> _delete(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDeleteConfirmDialog(context,
-        instanceName: instance.name);
+    final confirmed =
+        await showDeleteConfirmDialog(context, instanceName: instance.name);
     if (!confirmed || !context.mounted) return;
     await ref.read(instancesProvider.notifier).delete(instance.name);
     if (context.mounted) Navigator.of(context).pop();
@@ -338,18 +347,20 @@ class _ActionSection extends StatelessWidget {
 class _ActionTile extends StatelessWidget {
   final IconData icon;
   final String label;
-  final VoidCallback onTap;
+  final Future<void> Function() onTap;
   final Color? color;
   const _ActionTile(
-      {required this.icon, required this.label, required this.onTap, this.color});
+      {required this.icon,
+      required this.label,
+      required this.onTap,
+      this.color});
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       dense: true,
       leading: Icon(icon, size: 20, color: color),
-      title: Text(label,
-          style: color != null ? TextStyle(color: color) : null),
+      title: Text(label, style: color != null ? TextStyle(color: color) : null),
       trailing: const Icon(Icons.chevron_right, size: 16),
       onTap: onTap,
     );

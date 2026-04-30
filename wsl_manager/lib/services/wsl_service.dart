@@ -7,24 +7,46 @@ class WslService {
   static WslService get instance => _instance ??= WslService._();
   WslService._();
 
-  Future<List<WslInstance>> listInstances() async {
+  Future<ProcessResult> _runWsl(List<String> arguments) async {
     final result = await Process.run(
       'wsl',
-      ['--list', '--verbose'],
+      arguments,
       runInShell: true,
-      stdoutEncoding: null, // Get raw bytes
+      stdoutEncoding: null,
+      stderrEncoding: null,
     );
+    if (result.exitCode != 0) {
+      throw WslCommandException(
+          arguments, result.exitCode, _resultOutput(result));
+    }
+    return result;
+  }
+
+  String _resultOutput(ProcessResult result) {
+    final stderr = _decodeProcessOutput(result.stderr).trim();
+    if (stderr.isNotEmpty) return stderr;
+    return _decodeProcessOutput(result.stdout).trim();
+  }
+
+  String _decodeProcessOutput(Object? output) {
+    if (output is List<int>) return WslParser.decodeWslOutput(output);
+    if (output is String) return output;
+    return '';
+  }
+
+  Future<List<WslInstance>> listInstances() async {
+    final result = await _runWsl(['--list', '--verbose']);
     final bytes = result.stdout as List<int>;
     final decoded = WslParser.decodeWslOutput(bytes);
     return WslParser.parseVerboseList(decoded);
   }
 
   Future<void> startInstance(String name) async {
-    await Process.run('wsl', ['-d', name, '--', 'exit'], runInShell: true);
+    await _runWsl(['-d', name, '--', 'exit']);
   }
 
   Future<void> stopInstance(String name) async {
-    await Process.run('wsl', ['--terminate', name], runInShell: true);
+    await _runWsl(['--terminate', name]);
   }
 
   Future<void> deleteInstance(String name) async {
@@ -40,7 +62,7 @@ class WslService {
     if (onProgress != null) {
       _pollExportProgress(tarPath, onProgress);
     }
-    await Process.run('wsl', ['--export', name, tarPath], runInShell: true);
+    await _runWsl(['--export', name, tarPath]);
   }
 
   void _pollExportProgress(String tarPath, void Function(double) onProgress) {
@@ -61,11 +83,7 @@ class WslService {
   ) async {
     final dir = Directory(installDir);
     if (!dir.existsSync()) await dir.create(recursive: true);
-    await Process.run(
-      'wsl',
-      ['--import', name, installDir, tarPath, '--version', '2'],
-      runInShell: true,
-    );
+    await _runWsl(['--import', name, installDir, tarPath, '--version', '2']);
   }
 
   Future<void> renameInstance(
@@ -86,8 +104,7 @@ class WslService {
     String newName,
     String installDir,
   ) async {
-    final tmp =
-        '${Directory.systemTemp.path}\\wsl_dup_$sourceName.tar';
+    final tmp = '${Directory.systemTemp.path}\\wsl_dup_$sourceName.tar';
     await stopInstance(sourceName);
     await exportInstance(sourceName, tmp);
     await importInstance(newName, installDir, tmp);
@@ -95,15 +112,11 @@ class WslService {
   }
 
   Future<void> setDefaultDistro(String name) async {
-    await Process.run('wsl', ['--set-default', name], runInShell: true);
+    await _runWsl(['--set-default', name]);
   }
 
   Future<void> setVersion(String name, int version) async {
-    await Process.run(
-      'wsl',
-      ['--set-version', name, version.toString()],
-      runInShell: true,
-    );
+    await _runWsl(['--set-version', name, version.toString()]);
   }
 
   Future<void> setupUser(
@@ -111,46 +124,82 @@ class WslService {
     String username,
     String password,
   ) async {
-    await Process.run(
-      'wsl',
-      ['-d', instanceName, '-u', 'root', '--', 'useradd', '-m', '-s', '/bin/bash', username],
-      runInShell: true,
+    await _runWsl(
+      [
+        '-d',
+        instanceName,
+        '-u',
+        'root',
+        '--',
+        'useradd',
+        '-m',
+        '-s',
+        '/bin/bash',
+        username
+      ],
     );
-    await Process.run(
-      'wsl',
-      ['-d', instanceName, '-u', 'root', '--', 'usermod', '-aG', 'sudo', username],
-      runInShell: true,
+    await _runWsl(
+      [
+        '-d',
+        instanceName,
+        '-u',
+        'root',
+        '--',
+        'usermod',
+        '-aG',
+        'sudo',
+        username
+      ],
     );
-    await Process.run(
-      'wsl',
-      ['-d', instanceName, '-u', 'root', '--', 'bash', '-c', 'echo "$username:$password" | chpasswd'],
-      runInShell: true,
+    await _runWsl(
+      [
+        '-d',
+        instanceName,
+        '-u',
+        'root',
+        '--',
+        'bash',
+        '-c',
+        'echo "$username:$password" | chpasswd'
+      ],
     );
     final wslConf = '[user]\\ndefault=$username\\n';
-    await Process.run(
-      'wsl',
-      ['-d', instanceName, '-u', 'root', '--', 'bash', '-c', 'printf "$wslConf" > /etc/wsl.conf'],
-      runInShell: true,
+    await _runWsl(
+      [
+        '-d',
+        instanceName,
+        '-u',
+        'root',
+        '--',
+        'bash',
+        '-c',
+        'printf "$wslConf" > /etc/wsl.conf'
+      ],
     );
     await stopInstance(instanceName);
     password = ''; // clear from memory
   }
 
   Future<String> readWslConf(String instanceName) async {
-    final result = await Process.run(
-      'wsl',
+    final result = await _runWsl(
       ['-d', instanceName, '-u', 'root', '--', 'cat', '/etc/wsl.conf'],
-      runInShell: true,
     );
-    return result.stdout as String? ?? '';
+    return _decodeProcessOutput(result.stdout);
   }
 
   Future<void> writeWslConf(String instanceName, String content) async {
     final escaped = content.replaceAll("'", "'\\''");
-    await Process.run(
-      'wsl',
-      ['-d', instanceName, '-u', 'root', '--', 'bash', '-c', "printf '%s' '$escaped' > /etc/wsl.conf"],
-      runInShell: true,
+    await _runWsl(
+      [
+        '-d',
+        instanceName,
+        '-u',
+        'root',
+        '--',
+        'bash',
+        '-c',
+        "printf '%s' '$escaped' > /etc/wsl.conf"
+      ],
     );
   }
 
@@ -159,10 +208,17 @@ class WslService {
     String username,
     String newPassword,
   ) async {
-    await Process.run(
-      'wsl',
-      ['-d', instanceName, '-u', 'root', '--', 'bash', '-c', 'echo "$username:$newPassword" | chpasswd'],
-      runInShell: true,
+    await _runWsl(
+      [
+        '-d',
+        instanceName,
+        '-u',
+        'root',
+        '--',
+        'bash',
+        '-c',
+        'echo "$username:$newPassword" | chpasswd'
+      ],
     );
     newPassword = '';
   }
@@ -172,10 +228,26 @@ class WslService {
   }
 
   Future<void> openInExplorer(String name) async {
-    await Process.run('explorer.exe', [r'\\wsl.localhost\' + name], runInShell: true);
+    await Process.run('explorer.exe', [r'\\wsl.localhost\' + name],
+        runInShell: true);
   }
 
   Future<void> openInTerminal(String name) async {
     await Process.run('wt', ['wsl', '-d', name], runInShell: true);
+  }
+}
+
+class WslCommandException implements Exception {
+  final List<String> arguments;
+  final int exitCode;
+  final String output;
+
+  const WslCommandException(this.arguments, this.exitCode, this.output);
+
+  @override
+  String toString() {
+    final command = ['wsl', ...arguments].join(' ');
+    final details = output.isEmpty ? '' : ' : $output';
+    return '$command a échoué (code $exitCode)$details';
   }
 }
