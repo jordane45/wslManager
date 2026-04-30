@@ -25,9 +25,9 @@ Ouvrir le chantier V2 avec des fonctionnalités incrémentales, testables et com
 - [x] Alertes CPU/RAM avec notification Windows toast
   - [x] Définir les seuils dans les paramètres
   - [x] Déclencher une notification sur dépassement prolongé
-- [ ] Détection et affichage des ports forwardés par instance
-  - [ ] Explorer les sources fiables côté WSL/Windows
-  - [ ] Afficher les ports dans le détail d'instance
+- [x] Détection et affichage des ports forwardés par instance
+  - [x] Explorer les sources fiables côté WSL/Windows
+  - [x] Afficher les ports dans le détail d'instance
 
 ## Priorité 3 - Administration avancée
 

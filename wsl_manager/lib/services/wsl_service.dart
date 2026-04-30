@@ -233,7 +233,8 @@ class WslService {
         'sh',
         '-lc',
         'if command -v ss >/dev/null 2>&1; then ss -H -lntu; '
-            'elif command -v netstat >/dev/null 2>&1; then netstat -lntu; fi'
+            'elif command -v netstat >/dev/null 2>&1; then netstat -lntu; '
+            'else true; fi'
       ],
     );
     final output = _decodeProcessOutput(result.stdout);
