@@ -1,5 +1,6 @@
 import 'dart:io';
 import '../models/wsl_instance.dart';
+import '../models/wsl_port.dart';
 import '../utils/wsl_parser.dart';
 
 class WslService {
@@ -221,6 +222,85 @@ class WslService {
       ],
     );
     newPassword = '';
+  }
+
+  Future<List<WslPort>> listListeningPorts(String instanceName) async {
+    final result = await _runWsl(
+      [
+        '-d',
+        instanceName,
+        '--',
+        'sh',
+        '-lc',
+        'if command -v ss >/dev/null 2>&1; then ss -H -lntu; '
+            'elif command -v netstat >/dev/null 2>&1; then netstat -lntu; fi'
+      ],
+    );
+    final output = _decodeProcessOutput(result.stdout);
+    return _parseListeningPorts(output);
+  }
+
+  List<WslPort> _parseListeningPorts(String output) {
+    final ports = <String, WslPort>{};
+    for (final rawLine in output.split('\n')) {
+      final line = rawLine.trim();
+      if (line.isEmpty || line.startsWith('Proto')) continue;
+
+      final parts = line.split(RegExp(r'\s+'));
+      if (parts.isEmpty) continue;
+
+      final protocolToken = parts.first.toLowerCase();
+      final protocol = protocolToken.startsWith('tcp')
+          ? 'tcp'
+          : protocolToken.startsWith('udp')
+              ? 'udp'
+              : null;
+      if (protocol == null) continue;
+
+      final localAddress = _localAddressPart(parts);
+      if (localAddress == null) continue;
+
+      final parsed = _parseAddressPort(localAddress);
+      if (parsed == null || parsed.port <= 0) continue;
+
+      ports['$protocol/${parsed.port}/${parsed.address}'] = WslPort(
+        protocol: protocol.toUpperCase(),
+        address: parsed.address,
+        port: parsed.port,
+      );
+    }
+
+    final list = ports.values.toList()
+      ..sort((a, b) {
+        final portCompare = a.port.compareTo(b.port);
+        if (portCompare != 0) return portCompare;
+        return a.protocol.compareTo(b.protocol);
+      });
+    return list;
+  }
+
+  String? _localAddressPart(List<String> parts) {
+    if (parts.length >= 5 && (parts[1] == 'LISTEN' || parts[1] == 'UNCONN')) {
+      return parts[4];
+    }
+    if (parts.length >= 4 &&
+        (parts.first.startsWith('tcp') || parts.first.startsWith('udp'))) {
+      return parts[3];
+    }
+    return null;
+  }
+
+  ({String address, int port})? _parseAddressPort(String value) {
+    final clean = value.replaceAll('[', '').replaceAll(']', '');
+    final separator = clean.lastIndexOf(':');
+    if (separator < 0 || separator == clean.length - 1) return null;
+    final port = int.tryParse(clean.substring(separator + 1));
+    if (port == null) return null;
+    var address = clean.substring(0, separator);
+    if (address.isEmpty || address == '*' || address == '::') {
+      address = '0.0.0.0';
+    }
+    return (address: address, port: port);
   }
 
   Future<void> openInVsCode(String name) async {
