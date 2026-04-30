@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/app_config.dart';
 import '../../providers/config_provider.dart';
+import '../../services/backup_export_service.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -30,6 +31,18 @@ class SettingsScreen extends ConsumerWidget {
                 label: 'Dossier des snapshots',
                 value: cfg.snapshotsDir,
                 onChanged: (v) => _save(ref, cfg.copyWith(snapshotsDir: v)),
+              ),
+            ]),
+            const SizedBox(height: 16),
+            _Section(title: 'Sauvegarde', children: [
+              ListTile(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.archive_outlined, size: 20),
+                title: const Text('Exporter la configuration complete'),
+                subtitle: const Text('Templates, snapshots et fichiers JSON'),
+                trailing: const Icon(Icons.chevron_right, size: 16),
+                onTap: () => _exportFullConfiguration(context),
               ),
             ]),
             const SizedBox(height: 16),
@@ -93,15 +106,13 @@ class SettingsScreen extends ConsumerWidget {
                 dense: true,
                 title: const Text('Minimiser dans le systray a la fermeture'),
                 value: cfg.minimizeToTray,
-                onChanged: (v) =>
-                    _save(ref, cfg.copyWith(minimizeToTray: v)),
+                onChanged: (v) => _save(ref, cfg.copyWith(minimizeToTray: v)),
               ),
               SwitchListTile(
                 dense: true,
                 title: const Text('Lancer au demarrage Windows'),
                 value: cfg.launchAtStartup,
-                onChanged: (v) =>
-                    _save(ref, cfg.copyWith(launchAtStartup: v)),
+                onChanged: (v) => _save(ref, cfg.copyWith(launchAtStartup: v)),
               ),
             ]),
             const SizedBox(height: 16),
@@ -123,6 +134,41 @@ class SettingsScreen extends ConsumerWidget {
 
   void _save(WidgetRef ref, AppConfig cfg) {
     ref.read(configProvider.notifier).save(cfg);
+  }
+
+  Future<void> _exportFullConfiguration(BuildContext context) async {
+    final now = DateTime.now();
+    final filename =
+        'WSLManager_backup_${now.year}${_two(now.month)}${_two(now.day)}_'
+        '${_two(now.hour)}${_two(now.minute)}.zip';
+    final destination = await FilePicker.platform.saveFile(
+      dialogTitle: 'Exporter la configuration',
+      fileName: filename,
+      type: FileType.custom,
+      allowedExtensions: ['zip'],
+    );
+    if (destination == null) return;
+
+    try {
+      await BackupExportService.instance.exportFullConfiguration(
+        _ensureZipExtension(destination),
+      );
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Configuration exportee')),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur export : $e')),
+      );
+    }
+  }
+
+  String _two(int value) => value.toString().padLeft(2, '0');
+
+  String _ensureZipExtension(String path) {
+    return path.toLowerCase().endsWith('.zip') ? path : '$path.zip';
   }
 }
 
