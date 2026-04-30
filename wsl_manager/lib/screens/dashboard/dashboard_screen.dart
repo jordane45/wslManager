@@ -479,7 +479,7 @@ class _GroupSection extends StatelessWidget {
                 builder: (context, constraints) {
                   final columns = math.max(
                     1,
-                    math.min(4, (constraints.maxWidth / 340).floor()),
+                    math.min(5, (constraints.maxWidth / 280).floor()),
                   );
                   return GridView.builder(
                     shrinkWrap: true,
@@ -488,7 +488,7 @@ class _GroupSection extends StatelessWidget {
                       crossAxisCount: columns,
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
-                      mainAxisExtent: 216,
+                      mainAxisExtent: 168,
                     ),
                     itemCount: instances.length,
                     itemBuilder: (_, index) =>

@@ -33,7 +33,7 @@ class InstanceCard extends ConsumerWidget {
             borderRadius: BorderRadius.circular(12),
             onTap: () => context.push('/instance/${instance.name}'),
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12),
               child: compact
                   ? _CompactContent(instance: instance, data: data, ref: ref)
                   : _WideContent(instance: instance, data: data, ref: ref),
@@ -124,18 +124,18 @@ class _CompactContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 176,
+      height: 144,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               _DistroIcon(name: instance.name),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   instance.name,
-                  maxLines: 2,
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
@@ -145,7 +145,7 @@ class _CompactContent extends StatelessWidget {
               _QuickActions(instance: instance, ref: ref),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Wrap(
             spacing: 6,
             runSpacing: 6,
@@ -160,7 +160,7 @@ class _CompactContent extends StatelessWidget {
             Row(
               children: [
                 CpuGauge(cpuPercent: data!.cpuPercent, radius: 24),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 Expanded(
                   child: RamGauge(
                     usedMb: data!.ramUsedMb,
@@ -202,19 +202,19 @@ class _DistroIcon extends StatelessWidget {
     if (_iconAsset.isEmpty) {
       return Container(
         width: 40,
-        height: 40,
+        height: 36,
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.primaryContainer,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: const Icon(Icons.terminal, size: 22),
+        child: const Icon(Icons.terminal, size: 20),
       );
     }
     return Image.asset(
       _iconAsset,
-      width: 40,
-      height: 40,
-      errorBuilder: (_, __, ___) => const Icon(Icons.terminal, size: 40),
+      width: 36,
+      height: 36,
+      errorBuilder: (_, __, ___) => const Icon(Icons.terminal, size: 36),
     );
   }
 }
@@ -290,7 +290,7 @@ class _QuickActions extends StatelessWidget {
             onPressed: () =>
                 ref.read(instancesProvider.notifier).stop(instance.name),
           ),
-        if (!stopped && !running) const SizedBox(width: 40),
+        if (!stopped && !running) const SizedBox(width: 34),
         const SizedBox(width: 4),
         PopupMenuButton<String>(
           tooltip: 'Actions',
@@ -396,13 +396,13 @@ class _ActionButton extends StatelessWidget {
         onTap: onPressed,
         child: Container(
           width: 36,
-          height: 36,
+          height: 34,
           decoration: BoxDecoration(
             color: color.withAlpha(25),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: color.withAlpha(80)),
           ),
-          child: Icon(icon, size: 20, color: color),
+          child: Icon(icon, size: 19, color: color),
         ),
       ),
     );
