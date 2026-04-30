@@ -22,9 +22,9 @@ Ouvrir le chantier V2 avec des fonctionnalités incrémentales, testables et com
 - [x] Graphiques historiques CPU/RAM sur 5 minutes
   - [x] Stocker un historique glissant par instance
   - [x] Ajouter une visualisation dans l'onglet Monitoring
-- [ ] Alertes CPU/RAM avec notification Windows toast
-  - [ ] Définir les seuils dans les paramètres
-  - [ ] Déclencher une notification sur dépassement prolongé
+- [x] Alertes CPU/RAM avec notification Windows toast
+  - [x] Définir les seuils dans les paramètres
+  - [x] Déclencher une notification sur dépassement prolongé
 - [ ] Détection et affichage des ports forwardés par instance
   - [ ] Explorer les sources fiables côté WSL/Windows
   - [ ] Afficher les ports dans le détail d'instance

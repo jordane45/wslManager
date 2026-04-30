@@ -6,6 +6,10 @@ class AppConfig {
   final String locale;
   final bool minimizeToTray;
   final bool launchAtStartup;
+  final bool resourceAlertsEnabled;
+  final int cpuAlertThreshold;
+  final int ramAlertThreshold;
+  final int alertCooldownMinutes;
 
   const AppConfig({
     required this.templatesDir,
@@ -15,6 +19,10 @@ class AppConfig {
     this.locale = 'system',
     this.minimizeToTray = true,
     this.launchAtStartup = false,
+    this.resourceAlertsEnabled = false,
+    this.cpuAlertThreshold = 90,
+    this.ramAlertThreshold = 90,
+    this.alertCooldownMinutes = 5,
   });
 
   factory AppConfig.fromJson(Map<String, dynamic> json) => AppConfig(
@@ -26,6 +34,11 @@ class AppConfig {
         locale: json['locale'] as String? ?? 'system',
         minimizeToTray: json['minimize_to_tray'] as bool? ?? true,
         launchAtStartup: json['launch_at_startup'] as bool? ?? false,
+        resourceAlertsEnabled:
+            json['resource_alerts_enabled'] as bool? ?? false,
+        cpuAlertThreshold: json['cpu_alert_threshold'] as int? ?? 90,
+        ramAlertThreshold: json['ram_alert_threshold'] as int? ?? 90,
+        alertCooldownMinutes: json['alert_cooldown_minutes'] as int? ?? 5,
       );
 
   Map<String, dynamic> toJson() => {
@@ -37,6 +50,10 @@ class AppConfig {
         'locale': locale,
         'minimize_to_tray': minimizeToTray,
         'launch_at_startup': launchAtStartup,
+        'resource_alerts_enabled': resourceAlertsEnabled,
+        'cpu_alert_threshold': cpuAlertThreshold,
+        'ram_alert_threshold': ramAlertThreshold,
+        'alert_cooldown_minutes': alertCooldownMinutes,
       };
 
   AppConfig copyWith({
@@ -47,6 +64,10 @@ class AppConfig {
     String? locale,
     bool? minimizeToTray,
     bool? launchAtStartup,
+    bool? resourceAlertsEnabled,
+    int? cpuAlertThreshold,
+    int? ramAlertThreshold,
+    int? alertCooldownMinutes,
   }) =>
       AppConfig(
         templatesDir: templatesDir ?? this.templatesDir,
@@ -57,5 +78,10 @@ class AppConfig {
         locale: locale ?? this.locale,
         minimizeToTray: minimizeToTray ?? this.minimizeToTray,
         launchAtStartup: launchAtStartup ?? this.launchAtStartup,
+        resourceAlertsEnabled:
+            resourceAlertsEnabled ?? this.resourceAlertsEnabled,
+        cpuAlertThreshold: cpuAlertThreshold ?? this.cpuAlertThreshold,
+        ramAlertThreshold: ramAlertThreshold ?? this.ramAlertThreshold,
+        alertCooldownMinutes: alertCooldownMinutes ?? this.alertCooldownMinutes,
       );
 }

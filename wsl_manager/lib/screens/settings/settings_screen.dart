@@ -77,6 +77,53 @@ class SettingsScreen extends ConsumerWidget {
                   ],
                 ),
               ),
+              SwitchListTile(
+                dense: true,
+                title: const Text('Alertes CPU/RAM'),
+                subtitle: const Text('Notification Windows sur dépassement'),
+                value: cfg.resourceAlertsEnabled,
+                onChanged: (v) =>
+                    _save(ref, cfg.copyWith(resourceAlertsEnabled: v)),
+              ),
+              _ThresholdSlider(
+                label: 'Seuil CPU',
+                value: cfg.cpuAlertThreshold,
+                onChanged: (v) =>
+                    _save(ref, cfg.copyWith(cpuAlertThreshold: v)),
+              ),
+              _ThresholdSlider(
+                label: 'Seuil RAM',
+                value: cfg.ramAlertThreshold,
+                onChanged: (v) =>
+                    _save(ref, cfg.copyWith(ramAlertThreshold: v)),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Délai entre alertes : ${cfg.alertCooldownMinutes} min',
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 220,
+                      child: Slider(
+                        value: cfg.alertCooldownMinutes.toDouble(),
+                        min: 1,
+                        max: 30,
+                        divisions: 29,
+                        label: '${cfg.alertCooldownMinutes} min',
+                        onChanged: (v) => _save(
+                          ref,
+                          cfg.copyWith(alertCooldownMinutes: v.round()),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ]),
             const SizedBox(height: 16),
             _Section(title: l10n.settingsAppearance, children: [
@@ -226,6 +273,46 @@ class _Section extends StatelessWidget {
             ...children,
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ThresholdSlider extends StatelessWidget {
+  final String label;
+  final int value;
+  final ValueChanged<int> onChanged;
+
+  const _ThresholdSlider({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              '$label : $value%',
+              style: const TextStyle(fontSize: 13),
+            ),
+          ),
+          SizedBox(
+            width: 220,
+            child: Slider(
+              value: value.toDouble(),
+              min: 50,
+              max: 100,
+              divisions: 50,
+              label: '$value%',
+              onChanged: (v) => onChanged(v.round()),
+            ),
+          ),
+        ],
       ),
     );
   }

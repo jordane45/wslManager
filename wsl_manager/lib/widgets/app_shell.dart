@@ -5,6 +5,7 @@ import 'package:window_manager/window_manager.dart';
 
 import '../providers/config_provider.dart';
 import '../providers/instances_provider.dart';
+import '../providers/monitoring_alerts_provider.dart';
 import '../services/systray_service.dart';
 import '../services/wsl_service.dart';
 import 'custom_title_bar.dart';
@@ -70,7 +71,8 @@ class _AppShellState extends ConsumerState<AppShell> with WindowListener {
         _hasShownTrayHint = true;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('WSL Manager tourne en arriere-plan dans le systray.'),
+            content:
+                Text('WSL Manager tourne en arriere-plan dans le systray.'),
             duration: Duration(seconds: 3),
           ),
         );
@@ -99,6 +101,8 @@ class _AppShellState extends ConsumerState<AppShell> with WindowListener {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(monitoringAlertsProvider);
+
     ref.listen(instancesProvider, (_, next) {
       SystrayService.instance.updateMenu(next.valueOrNull ?? []);
     });
