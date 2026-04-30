@@ -16,11 +16,16 @@ Ajouter une organisation visuelle des instances WSL par groupes et remplacer l'a
 - [x] V2-008 - Ajouter l'action "Changer de groupe" sur chaque instance
 - [x] V2-009 - Gerer les instances sans groupe dans "Non classees"
 - [x] V2-010 - Verifier la compilation/analyse quand l'environnement Flutter le permet
+- [x] V2-011 - Ajouter l'action "Renommer" dans l'en-tete des groupes
+- [x] V2-012 - Ajouter l'action "Supprimer" en remettant les instances dans "Non classees"
+- [x] V2-013 - Ajouter les actions "Monter" et "Descendre" pour reorganiser les groupes
+- [x] V2-014 - Verifier l'administration des groupes par analyse Dart
 
 ## Verification
 
 - `git diff --check -- wsl_manager/lib wsl_manager_output/TODO_v2.md` : OK
 - `dart analyze` via le SDK Flutter direct : OK, aucun probleme detecte
+- Administration des groupes : `dart analyze` OK apres ajout renommer/supprimer/monter/descendre
 - `flutter analyze` via le wrapper Flutter reste bloque dans ce shell par `Unable to find git in your PATH`
 
 ## Design fonctionnel
@@ -61,6 +66,7 @@ Fichier cible dans le dossier AppData de l'application :
 - Afficher chaque groupe sous forme de section.
 - Afficher les instances en grille responsive.
 - Adapter les cartes d'instances a une largeur de grille.
+- Administrer les groupes depuis un menu `...` dans l'en-tete : renommer, supprimer, monter, descendre.
 
 ## Hors perimetre de cette passe
 

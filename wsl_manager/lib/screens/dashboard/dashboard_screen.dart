@@ -136,6 +136,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 searchActive: _search.trim().isNotEmpty,
                 onToggleGroup: (groupId) =>
                     ref.read(groupsProvider.notifier).toggleCollapsed(groupId),
+                onRenameGroup: (group) =>
+                    _showRenameGroupDialog(context, group),
+                onDeleteGroup: (group) =>
+                    _showDeleteGroupDialog(context, group),
+                onMoveGroup: (groupId, direction) =>
+                    ref.read(groupsProvider.notifier).move(groupId, direction),
               );
             },
           ),
@@ -178,6 +184,73 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     }
   }
 
+  Future<void> _showRenameGroupDialog(
+    BuildContext context,
+    InstanceGroup group,
+  ) async {
+    final controller = TextEditingController(text: group.name);
+    final name = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Renommer le groupe'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(
+            labelText: 'Nom du groupe',
+            border: OutlineInputBorder(),
+          ),
+          onSubmitted: (value) => Navigator.of(context).pop(value),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(controller.text),
+            child: const Text('Renommer'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+
+    if (name != null && name.trim().isNotEmpty) {
+      await ref.read(groupsProvider.notifier).rename(group.id, name);
+    }
+  }
+
+  Future<void> _showDeleteGroupDialog(
+    BuildContext context,
+    InstanceGroup group,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Supprimer le groupe'),
+        content: Text(
+          'Supprimer "${group.name}" ? Les instances associees seront remises '
+          'dans "Non classees".',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Supprimer'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await ref.read(groupsProvider.notifier).delete(group.id);
+    }
+  }
+
   int _comparator(WslInstance a, WslInstance b) {
     switch (_sort) {
       case _SortMode.name:
@@ -195,12 +268,18 @@ class _GroupedGrid extends StatelessWidget {
   final InstanceGroupsState groupsState;
   final bool searchActive;
   final ValueChanged<String> onToggleGroup;
+  final ValueChanged<InstanceGroup> onRenameGroup;
+  final ValueChanged<InstanceGroup> onDeleteGroup;
+  final void Function(String groupId, int direction) onMoveGroup;
 
   const _GroupedGrid({
     required this.instances,
     required this.groupsState,
     required this.searchActive,
     required this.onToggleGroup,
+    required this.onRenameGroup,
+    required this.onDeleteGroup,
+    required this.onMoveGroup,
   });
 
   @override
@@ -214,15 +293,23 @@ class _GroupedGrid extends StatelessWidget {
     }
 
     final sections = <Widget>[];
-    for (final group in groupsState.groups) {
+    for (var index = 0; index < groupsState.groups.length; index++) {
+      final group = groupsState.groups[index];
       final groupInstances = byGroup[group.id] ?? [];
       if (groupInstances.isEmpty && searchActive) continue;
       sections.add(
         _GroupSection(
+          group: group,
           title: group.name,
           count: groupInstances.length,
           collapsed: group.collapsed && !searchActive,
           onToggle: () => onToggleGroup(group.id),
+          onRename: () => onRenameGroup(group),
+          onDelete: () => onDeleteGroup(group),
+          onMoveUp: index == 0 ? null : () => onMoveGroup(group.id, -1),
+          onMoveDown: index == groupsState.groups.length - 1
+              ? null
+              : () => onMoveGroup(group.id, 1),
           instances: groupInstances,
         ),
       );
@@ -248,18 +335,28 @@ class _GroupedGrid extends StatelessWidget {
 }
 
 class _GroupSection extends StatelessWidget {
+  final InstanceGroup? group;
   final String title;
   final int count;
   final bool collapsed;
   final VoidCallback? onToggle;
+  final VoidCallback? onRename;
+  final VoidCallback? onDelete;
+  final VoidCallback? onMoveUp;
+  final VoidCallback? onMoveDown;
   final List<WslInstance> instances;
 
   const _GroupSection({
+    this.group,
     required this.title,
     required this.count,
     required this.collapsed,
     required this.instances,
     this.onToggle,
+    this.onRename,
+    this.onDelete,
+    this.onMoveUp,
+    this.onMoveDown,
   });
 
   @override
@@ -305,6 +402,64 @@ class _GroupSection extends StatelessWidget {
                   style: Theme.of(context).textTheme.labelSmall,
                 ),
               ),
+              if (group != null)
+                PopupMenuButton<_GroupAction>(
+                  tooltip: 'Administrer le groupe',
+                  icon: const Icon(Icons.more_horiz),
+                  onSelected: (action) {
+                    switch (action) {
+                      case _GroupAction.rename:
+                        onRename?.call();
+                      case _GroupAction.delete:
+                        onDelete?.call();
+                      case _GroupAction.moveUp:
+                        onMoveUp?.call();
+                      case _GroupAction.moveDown:
+                        onMoveDown?.call();
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: _GroupAction.rename,
+                      child: ListTile(
+                        dense: true,
+                        leading: Icon(Icons.edit, size: 18),
+                        title: Text('Renommer'),
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: _GroupAction.moveUp,
+                      enabled: onMoveUp != null,
+                      child: const ListTile(
+                        dense: true,
+                        leading: Icon(Icons.arrow_upward, size: 18),
+                        title: Text('Monter'),
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: _GroupAction.moveDown,
+                      enabled: onMoveDown != null,
+                      child: const ListTile(
+                        dense: true,
+                        leading: Icon(Icons.arrow_downward, size: 18),
+                        title: Text('Descendre'),
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ),
+                    const PopupMenuDivider(),
+                    const PopupMenuItem(
+                      value: _GroupAction.delete,
+                      child: ListTile(
+                        dense: true,
+                        leading: Icon(Icons.delete_outline, size: 18),
+                        title: Text('Supprimer'),
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ),
+                  ],
+                ),
             ],
           ),
           if (!collapsed) ...[
@@ -347,5 +502,7 @@ class _GroupSection extends StatelessWidget {
     );
   }
 }
+
+enum _GroupAction { rename, delete, moveUp, moveDown }
 
 enum _SortMode { name, state, version }
