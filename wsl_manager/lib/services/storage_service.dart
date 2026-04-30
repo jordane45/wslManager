@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import '../utils/constants.dart';
 
 class StorageService {
   static StorageService? _instance;
@@ -20,15 +21,24 @@ class StorageService {
   }
 
   Future<String> getTemplatesDir() async {
-    final base = await getAppDataDir();
-    final dir = Directory(p.join(base.path, 'templates'));
-    if (!dir.existsSync()) await dir.create(recursive: true);
-    return dir.path;
+    return _ensureDir(await _configuredDir('templates_dir', 'templates'));
   }
 
   Future<String> getSnapshotsDir() async {
-    final base = await getAppDataDir();
-    final dir = Directory(p.join(base.path, 'snapshots'));
+    return _ensureDir(await _configuredDir('snapshots_dir', 'snapshots'));
+  }
+
+  Future<String> _configuredDir(String key, String fallbackName) async {
+    final config = await readJson(kConfigFile, (m) => m);
+    final configured = config?[key];
+    if (configured is String && configured.trim().isNotEmpty) {
+      return configured;
+    }
+    return p.join(Directory.current.path, fallbackName);
+  }
+
+  Future<String> _ensureDir(String path) async {
+    final dir = Directory(path);
     if (!dir.existsSync()) await dir.create(recursive: true);
     return dir.path;
   }
