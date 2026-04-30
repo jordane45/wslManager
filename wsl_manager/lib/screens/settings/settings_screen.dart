@@ -1,6 +1,7 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:file_picker/file_picker.dart';
+
 import '../../models/app_config.dart';
 import '../../providers/config_provider.dart';
 
@@ -12,7 +13,7 @@ class SettingsScreen extends ConsumerWidget {
     final config = ref.watch(configProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Paramètres')),
+      appBar: AppBar(title: const Text('Parametres')),
       body: config.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Erreur : $e')),
@@ -39,9 +40,10 @@ class SettingsScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                        'Intervalle de rafraîchissement : '
-                        '${cfg.monitoringIntervalSeconds}s',
-                        style: const TextStyle(fontSize: 13)),
+                      'Intervalle de rafraichissement : '
+                      '${cfg.monitoringIntervalSeconds}s',
+                      style: const TextStyle(fontSize: 13),
+                    ),
                     Slider(
                       value: cfg.monitoringIntervalSeconds.toDouble(),
                       min: 2,
@@ -49,9 +51,9 @@ class SettingsScreen extends ConsumerWidget {
                       divisions: 29,
                       label: '${cfg.monitoringIntervalSeconds}s',
                       onChanged: (v) => _save(
-                          ref,
-                          cfg.copyWith(
-                              monitoringIntervalSeconds: v.round())),
+                        ref,
+                        cfg.copyWith(monitoringIntervalSeconds: v.round()),
+                      ),
                     ),
                   ],
                 ),
@@ -64,15 +66,22 @@ class SettingsScreen extends ConsumerWidget {
                 child: SegmentedButton<String>(
                   segments: const [
                     ButtonSegment(
-                        value: 'system',
-                        label: Text('Système'),
-                        icon: Icon(Icons.brightness_auto)),
+                      value: 'system',
+                      label: Text('Systeme'),
+                      icon: Icon(Icons.brightness_auto),
+                    ),
                     ButtonSegment(
-                        value: 'light',
-                        label: Text('Clair'),
-                        icon: Icon(Icons.brightness_high)),
+                      value: 'light',
+                      label: Text('Clair'),
+                      icon: Icon(Icons.brightness_high),
+                    ),
+                    ButtonSegment(
+                      value: 'dark',
+                      label: Text('Sombre'),
+                      icon: Icon(Icons.dark_mode),
+                    ),
                   ],
-                  selected: {cfg.theme == 'dark' ? 'system' : cfg.theme},
+                  selected: {cfg.theme},
                   onSelectionChanged: (v) =>
                       _save(ref, cfg.copyWith(theme: v.first)),
                 ),
@@ -82,26 +91,28 @@ class SettingsScreen extends ConsumerWidget {
             _Section(title: 'Comportement', children: [
               SwitchListTile(
                 dense: true,
-                title: const Text('Minimiser dans le systray à la fermeture'),
+                title: const Text('Minimiser dans le systray a la fermeture'),
                 value: cfg.minimizeToTray,
                 onChanged: (v) =>
                     _save(ref, cfg.copyWith(minimizeToTray: v)),
               ),
               SwitchListTile(
                 dense: true,
-                title: const Text('Lancer au démarrage Windows'),
+                title: const Text('Lancer au demarrage Windows'),
                 value: cfg.launchAtStartup,
                 onChanged: (v) =>
                     _save(ref, cfg.copyWith(launchAtStartup: v)),
               ),
             ]),
             const SizedBox(height: 16),
-            const _Section(title: 'À propos', children: [
+            const _Section(title: 'A propos', children: [
               ListTile(
                 dense: true,
                 title: Text('Version'),
-                trailing: Text('1.0.0',
-                    style: TextStyle(fontWeight: FontWeight.w500)),
+                trailing: Text(
+                  '1.0.0',
+                  style: TextStyle(fontWeight: FontWeight.w500),
+                ),
               ),
             ]),
           ],
@@ -128,11 +139,13 @@ class _Section extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleSmall
-                    ?.copyWith(fontWeight: FontWeight.w600)),
+            Text(
+              title,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleSmall
+                  ?.copyWith(fontWeight: FontWeight.w600),
+            ),
             const Divider(height: 12),
             ...children,
           ],
@@ -146,8 +159,11 @@ class _DirRow extends StatelessWidget {
   final String label;
   final String value;
   final ValueChanged<String> onChanged;
-  const _DirRow(
-      {required this.label, required this.value, required this.onChanged});
+  const _DirRow({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -160,11 +176,14 @@ class _DirRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(label, style: const TextStyle(fontSize: 13)),
-                Text(value,
-                    style: TextStyle(
-                        fontSize: 11,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant),
-                    overflow: TextOverflow.ellipsis),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ],
             ),
           ),
@@ -173,7 +192,8 @@ class _DirRow extends StatelessWidget {
             tooltip: 'Parcourir',
             onPressed: () async {
               final result = await FilePicker.platform.getDirectoryPath(
-                  dialogTitle: 'Choisir le dossier');
+                dialogTitle: 'Choisir le dossier',
+              );
               if (result != null) onChanged(result);
             },
           ),

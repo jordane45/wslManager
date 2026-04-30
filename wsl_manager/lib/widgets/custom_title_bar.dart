@@ -6,20 +6,34 @@ class CustomTitleBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onPanStart: (_) => windowManager.startDragging(),
       child: Container(
         height: 40,
-        color: Colors.transparent,
+        color: colorScheme.surfaceContainerLowest,
         padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Row(
           children: [
             const SizedBox(width: 4),
-            Image.asset('assets/icons/distros/ubuntu.png',
-                width: 16, height: 16, errorBuilder: (_, __, ___) => const Icon(Icons.terminal, size: 16)),
+            Image.asset(
+              'assets/icons/distros/ubuntu.png',
+              width: 16,
+              height: 16,
+              errorBuilder: (_, __, ___) => Icon(
+                Icons.terminal,
+                size: 16,
+                color: colorScheme.primary,
+              ),
+            ),
             const SizedBox(width: 8),
-            Text('WSL Manager',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600)),
+            Text(
+              'WSL Manager',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurface,
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
             const Spacer(),
             _TitleButton(
               icon: Icons.remove,
@@ -51,7 +65,11 @@ class _TitleButton extends StatefulWidget {
   final IconData icon;
   final VoidCallback onTap;
   final bool isClose;
-  const _TitleButton({required this.icon, required this.onTap, this.isClose = false});
+  const _TitleButton({
+    required this.icon,
+    required this.onTap,
+    this.isClose = false,
+  });
 
   @override
   State<_TitleButton> createState() => _TitleButtonState();
@@ -62,6 +80,7 @@ class _TitleButtonState extends State<_TitleButton> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return MouseRegion(
       onEnter: (_) => setState(() => _hover = true),
       onExit: (_) => setState(() => _hover = false),
@@ -71,11 +90,17 @@ class _TitleButtonState extends State<_TitleButton> {
           width: 46,
           height: 40,
           color: _hover
-              ? (widget.isClose ? Colors.red : Colors.grey.withAlpha(40))
+              ? (widget.isClose
+                  ? Colors.red
+                  : colorScheme.onSurface.withAlpha(20))
               : Colors.transparent,
-          child: Icon(widget.icon,
-              size: 14,
-              color: _hover && widget.isClose ? Colors.white : null),
+          child: Icon(
+            widget.icon,
+            size: 14,
+            color: _hover && widget.isClose
+                ? Colors.white
+                : colorScheme.onSurfaceVariant,
+          ),
         ),
       ),
     );

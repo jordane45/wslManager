@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:window_manager/window_manager.dart';
+
 import '../providers/config_provider.dart';
 import '../providers/instances_provider.dart';
 import '../services/systray_service.dart';
@@ -67,10 +68,9 @@ class _AppShellState extends ConsumerState<AppShell> with WindowListener {
       await windowManager.hide();
       if (!_hasShownTrayHint && mounted) {
         _hasShownTrayHint = true;
-        // Show hint via snackbar before hiding (shown briefly before window hides)
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('WSL Manager tourne en arrière-plan dans le systray.'),
+            content: Text('WSL Manager tourne en arriere-plan dans le systray.'),
             duration: Duration(seconds: 3),
           ),
         );
@@ -84,8 +84,7 @@ class _AppShellState extends ConsumerState<AppShell> with WindowListener {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Rebuild tray menu when instances change
-    final instances = ref.watch(instancesProvider).valueOrNull ?? [];
+    final instances = ref.read(instancesProvider).valueOrNull ?? [];
     SystrayService.instance.updateMenu(instances);
   }
 
@@ -100,14 +99,15 @@ class _AppShellState extends ConsumerState<AppShell> with WindowListener {
 
   @override
   Widget build(BuildContext context) {
-    // Keep tray in sync with provider changes
     ref.listen(instancesProvider, (_, next) {
       SystrayService.instance.updateMenu(next.valueOrNull ?? []);
     });
 
     final idx = _selectedIndex(context);
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: colorScheme.surface,
       body: Column(
         children: [
           const CustomTitleBar(),
@@ -115,29 +115,39 @@ class _AppShellState extends ConsumerState<AppShell> with WindowListener {
             child: Row(
               children: [
                 NavigationRail(
-                  backgroundColor: Colors.transparent,
+                  backgroundColor: colorScheme.surfaceContainerLowest,
                   selectedIndex: idx,
                   labelType: NavigationRailLabelType.all,
-                  minWidth: 72,
+                  minWidth: 84,
                   useIndicator: true,
-                  indicatorColor: const Color(0xFF0078D4).withAlpha(40),
-                  selectedLabelTextStyle: const TextStyle(
+                  indicatorColor: colorScheme.primaryContainer,
+                  selectedLabelTextStyle: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF0078D4),
+                    color: colorScheme.primary,
                   ),
-                  unselectedLabelTextStyle: const TextStyle(fontSize: 11),
-                  selectedIconTheme: const IconThemeData(
-                    color: Color(0xFF0078D4),
+                  unselectedLabelTextStyle: TextStyle(
+                    fontSize: 11,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  selectedIconTheme: IconThemeData(
+                    color: colorScheme.primary,
                     size: 22,
                   ),
-                  unselectedIconTheme: const IconThemeData(size: 22),
+                  unselectedIconTheme: IconThemeData(
+                    color: colorScheme.onSurfaceVariant,
+                    size: 22,
+                  ),
                   onDestinationSelected: (i) {
                     switch (i) {
-                      case 0: context.go('/');
-                      case 1: context.go('/templates');
-                      case 2: context.go('/snapshots');
-                      case 3: context.go('/settings');
+                      case 0:
+                        context.go('/');
+                      case 1:
+                        context.go('/templates');
+                      case 2:
+                        context.go('/snapshots');
+                      case 3:
+                        context.go('/settings');
                     }
                   },
                   destinations: const [
@@ -159,7 +169,7 @@ class _AppShellState extends ConsumerState<AppShell> with WindowListener {
                     NavigationRailDestination(
                       icon: Icon(Icons.settings_outlined),
                       selectedIcon: Icon(Icons.settings),
-                      label: Text('Paramètres'),
+                      label: Text('Parametres'),
                     ),
                   ],
                 ),

@@ -39,16 +39,50 @@ class App extends ConsumerWidget {
     final themeConfig = ref.watch(configProvider).valueOrNull?.theme ?? 'system';
     final themeMode = switch (themeConfig) {
       'light' => ThemeMode.light,
+      'dark' => ThemeMode.dark,
       _ => ThemeMode.system,
     };
+
+    final lightScheme = ColorScheme.fromSeed(
+      seedColor: const Color(0xFF0078D4),
+      brightness: Brightness.light,
+    );
+    final darkScheme = ColorScheme.fromSeed(
+      seedColor: const Color(0xFF0078D4),
+      brightness: Brightness.dark,
+    );
 
     return MaterialApp.router(
       title: 'WSL Manager',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF0078D4),
-          brightness: Brightness.light,
+        colorScheme: lightScheme,
+        scaffoldBackgroundColor: lightScheme.surface,
+        cardTheme: CardThemeData(
+          color: lightScheme.surfaceContainerLowest,
+          elevation: 0,
+        ),
+        dividerTheme: DividerThemeData(color: lightScheme.outlineVariant),
+        appBarTheme: AppBarTheme(
+          backgroundColor: lightScheme.surface,
+          foregroundColor: lightScheme.onSurface,
+          elevation: 0,
+        ),
+        useMaterial3: true,
+        fontFamily: 'Segoe UI',
+      ),
+      darkTheme: ThemeData(
+        colorScheme: darkScheme,
+        scaffoldBackgroundColor: darkScheme.surface,
+        cardTheme: CardThemeData(
+          color: darkScheme.surfaceContainerLowest,
+          elevation: 0,
+        ),
+        dividerTheme: DividerThemeData(color: darkScheme.outlineVariant),
+        appBarTheme: AppBarTheme(
+          backgroundColor: darkScheme.surface,
+          foregroundColor: darkScheme.onSurface,
+          elevation: 0,
         ),
         useMaterial3: true,
         fontFamily: 'Segoe UI',

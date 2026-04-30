@@ -9,7 +9,9 @@
       "PowerShell(Get-Command python3, py, python -ErrorAction SilentlyContinue)",
       "PowerShell(py --version 2>&1)",
       "PowerShell(py -c \"import sys; print\\(sys.executable\\)\" 2>&1)",
-      "Bash(flutter analyze *)"
+      "Bash(flutter analyze *)",
+      "Bash(git tag -a V1.0.1 -m 'WSL Manager V1.0.1 — Correctifs UI *)",
+      "Bash(git push *)"
     ]
   }
 }
