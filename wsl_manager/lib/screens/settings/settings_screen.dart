@@ -2,6 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../models/app_config.dart';
 import '../../providers/config_provider.dart';
 import '../../services/backup_export_service.dart';
@@ -12,49 +13,54 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final config = ref.watch(configProvider);
+    final l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Parametres')),
+      appBar: AppBar(title: Text(l10n.settingsTitle)),
       body: config.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Erreur : $e')),
         data: (cfg) => ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            _Section(title: 'Stockage', children: [
+            _Section(title: l10n.settingsStorage, children: [
               _DirRow(
-                label: 'Dossier des templates',
+                label: l10n.settingsTemplatesDir,
                 value: cfg.templatesDir,
+                browseTooltip: l10n.commonBrowse,
+                dialogTitle: l10n.commonChooseFolder,
                 onChanged: (v) => _save(ref, cfg.copyWith(templatesDir: v)),
               ),
               _DirRow(
-                label: 'Dossier des snapshots',
+                label: l10n.settingsSnapshotsDir,
                 value: cfg.snapshotsDir,
+                browseTooltip: l10n.commonBrowse,
+                dialogTitle: l10n.commonChooseFolder,
                 onChanged: (v) => _save(ref, cfg.copyWith(snapshotsDir: v)),
               ),
             ]),
             const SizedBox(height: 16),
-            _Section(title: 'Sauvegarde', children: [
+            _Section(title: l10n.settingsBackup, children: [
               ListTile(
                 dense: true,
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.archive_outlined, size: 20),
-                title: const Text('Exporter la configuration complete'),
-                subtitle: const Text('Templates, snapshots et fichiers JSON'),
+                title: Text(l10n.settingsExportConfig),
+                subtitle: Text(l10n.settingsExportConfigSubtitle),
                 trailing: const Icon(Icons.chevron_right, size: 16),
                 onTap: () => _exportFullConfiguration(context),
               ),
             ]),
             const SizedBox(height: 16),
-            _Section(title: 'Surveillance', children: [
+            _Section(title: l10n.settingsMonitoring, children: [
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Intervalle de rafraichissement : '
-                      '${cfg.monitoringIntervalSeconds}s',
+                      '${l10n.settingsRefreshInterval} : '
+                      '${cfg.monitoringIntervalSeconds} s',
                       style: const TextStyle(fontSize: 13),
                     ),
                     Slider(
@@ -73,25 +79,25 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ]),
             const SizedBox(height: 16),
-            _Section(title: 'Apparence', children: [
+            _Section(title: l10n.settingsAppearance, children: [
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: SegmentedButton<String>(
-                  segments: const [
+                  segments: [
                     ButtonSegment(
                       value: 'system',
-                      label: Text('Systeme'),
-                      icon: Icon(Icons.brightness_auto),
+                      label: Text(l10n.settingsSystem),
+                      icon: const Icon(Icons.brightness_auto),
                     ),
                     ButtonSegment(
                       value: 'light',
-                      label: Text('Clair'),
-                      icon: Icon(Icons.brightness_high),
+                      label: Text(l10n.settingsLight),
+                      icon: const Icon(Icons.brightness_high),
                     ),
                     ButtonSegment(
                       value: 'dark',
-                      label: Text('Sombre'),
-                      icon: Icon(Icons.dark_mode),
+                      label: Text(l10n.settingsDark),
+                      icon: const Icon(Icons.dark_mode),
                     ),
                   ],
                   selected: {cfg.theme},
@@ -99,28 +105,51 @@ class SettingsScreen extends ConsumerWidget {
                       _save(ref, cfg.copyWith(theme: v.first)),
                 ),
               ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: SegmentedButton<String>(
+                  segments: [
+                    ButtonSegment(
+                      value: 'system',
+                      label: Text(l10n.settingsSystem),
+                      icon: const Icon(Icons.language),
+                    ),
+                    ButtonSegment(
+                      value: 'fr',
+                      label: Text(l10n.settingsFrench),
+                    ),
+                    ButtonSegment(
+                      value: 'en',
+                      label: Text(l10n.settingsEnglish),
+                    ),
+                  ],
+                  selected: {cfg.locale},
+                  onSelectionChanged: (v) =>
+                      _save(ref, cfg.copyWith(locale: v.first)),
+                ),
+              ),
             ]),
             const SizedBox(height: 16),
-            _Section(title: 'Comportement', children: [
+            _Section(title: l10n.settingsBehavior, children: [
               SwitchListTile(
                 dense: true,
-                title: const Text('Minimiser dans le systray a la fermeture'),
+                title: Text(l10n.settingsMinimizeToTray),
                 value: cfg.minimizeToTray,
                 onChanged: (v) => _save(ref, cfg.copyWith(minimizeToTray: v)),
               ),
               SwitchListTile(
                 dense: true,
-                title: const Text('Lancer au demarrage Windows'),
+                title: Text(l10n.settingsLaunchAtStartup),
                 value: cfg.launchAtStartup,
                 onChanged: (v) => _save(ref, cfg.copyWith(launchAtStartup: v)),
               ),
             ]),
             const SizedBox(height: 16),
-            const _Section(title: 'A propos', children: [
+            _Section(title: l10n.settingsAbout, children: [
               ListTile(
                 dense: true,
-                title: Text('Version'),
-                trailing: Text(
+                title: Text(l10n.settingsVersion),
+                trailing: const Text(
                   '1.0.0',
                   style: TextStyle(fontWeight: FontWeight.w500),
                 ),
@@ -137,12 +166,13 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Future<void> _exportFullConfiguration(BuildContext context) async {
+    final l10n = context.l10n;
     final now = DateTime.now();
     final filename =
         'WSLManager_backup_${now.year}${_two(now.month)}${_two(now.day)}_'
         '${_two(now.hour)}${_two(now.minute)}.zip';
     final destination = await FilePicker.platform.saveFile(
-      dialogTitle: 'Exporter la configuration',
+      dialogTitle: l10n.settingsExportDialogTitle,
       fileName: filename,
       type: FileType.custom,
       allowedExtensions: ['zip'],
@@ -155,12 +185,12 @@ class SettingsScreen extends ConsumerWidget {
       );
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Configuration exportee')),
+        SnackBar(content: Text(l10n.settingsExportSuccess)),
       );
     } catch (e) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur export : $e')),
+        SnackBar(content: Text('${l10n.settingsExportError} : $e')),
       );
     }
   }
@@ -204,10 +234,14 @@ class _Section extends StatelessWidget {
 class _DirRow extends StatelessWidget {
   final String label;
   final String value;
+  final String browseTooltip;
+  final String dialogTitle;
   final ValueChanged<String> onChanged;
   const _DirRow({
     required this.label,
     required this.value,
+    required this.browseTooltip,
+    required this.dialogTitle,
     required this.onChanged,
   });
 
@@ -235,10 +269,10 @@ class _DirRow extends StatelessWidget {
           ),
           IconButton(
             icon: const Icon(Icons.folder_open, size: 18),
-            tooltip: 'Parcourir',
+            tooltip: browseTooltip,
             onPressed: () async {
               final result = await FilePicker.platform.getDirectoryPath(
-                dialogTitle: 'Choisir le dossier',
+                dialogTitle: dialogTitle,
               );
               if (result != null) onChanged(result);
             },

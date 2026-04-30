@@ -7,8 +7,9 @@ Ouvrir le chantier V2 avec des fonctionnalités incrémentales, testables et com
 ## Priorité 1 - Fondations utiles
 
 - [ ] Internationalisation i18n EN/FR
-  - [ ] Ajouter la structure `AppLocalizations`
-  - [ ] Prévoir les clés pour les écrans principaux
+  - [x] Ajouter la structure `AppLocalizations`
+  - [x] Prévoir les premières clés pour les écrans principaux
+  - [x] Ajouter le choix de langue système/FR/EN dans les paramètres
   - [ ] Basculer progressivement les libellés codés en dur
 - [x] Export configuration complète en ZIP
   - [x] Inclure `config.json`, `templates.json`, `snapshots.json`, `groups.json`
@@ -55,4 +56,4 @@ Ouvrir le chantier V2 avec des fonctionnalités incrémentales, testables et com
 ## Démarrage prévu
 
 - [x] Commencer par l'export configuration complète en ZIP, car la dépendance `archive` existe déjà.
-- [ ] Ensuite, préparer la structure i18n pour faciliter les changements d'interface à venir.
+- [x] Ensuite, préparer la structure i18n pour faciliter les changements d'interface à venir.

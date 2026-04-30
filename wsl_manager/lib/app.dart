@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'l10n/app_localizations.dart';
 import 'providers/config_provider.dart';
 import 'screens/dashboard/dashboard_screen.dart';
 import 'screens/instance_detail/instance_detail_screen.dart';
@@ -22,8 +24,10 @@ final _router = GoRouter(
           builder: (_, state) =>
               InstanceDetailScreen(name: state.pathParameters['name']!),
         ),
-        GoRoute(path: '/templates', builder: (_, __) => const TemplatesScreen()),
-        GoRoute(path: '/snapshots', builder: (_, __) => const SnapshotsScreen()),
+        GoRoute(
+            path: '/templates', builder: (_, __) => const TemplatesScreen()),
+        GoRoute(
+            path: '/snapshots', builder: (_, __) => const SnapshotsScreen()),
         GoRoute(path: '/settings', builder: (_, __) => const SettingsScreen()),
       ],
     ),
@@ -36,11 +40,19 @@ class App extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeConfig = ref.watch(configProvider).valueOrNull?.theme ?? 'system';
+    final themeConfig =
+        ref.watch(configProvider).valueOrNull?.theme ?? 'system';
+    final localeConfig =
+        ref.watch(configProvider).valueOrNull?.locale ?? 'system';
     final themeMode = switch (themeConfig) {
       'light' => ThemeMode.light,
       'dark' => ThemeMode.dark,
       _ => ThemeMode.system,
+    };
+    final locale = switch (localeConfig) {
+      'en' => const Locale('en'),
+      'fr' => const Locale('fr'),
+      _ => null,
     };
 
     final lightScheme = ColorScheme.fromSeed(
@@ -55,6 +67,14 @@ class App extends ConsumerWidget {
     return MaterialApp.router(
       title: 'WSL Manager',
       debugShowCheckedModeBanner: false,
+      locale: locale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
       theme: ThemeData(
         colorScheme: lightScheme,
         scaffoldBackgroundColor: lightScheme.surface,
