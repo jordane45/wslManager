@@ -19,9 +19,9 @@ Ouvrir le chantier V2 avec des fonctionnalités incrémentales, testables et com
 
 ## Priorité 2 - Monitoring et observabilité
 
-- [ ] Graphiques historiques CPU/RAM sur 5 minutes
-  - [ ] Stocker un historique glissant par instance
-  - [ ] Ajouter une visualisation dans l'onglet Monitoring
+- [x] Graphiques historiques CPU/RAM sur 5 minutes
+  - [x] Stocker un historique glissant par instance
+  - [x] Ajouter une visualisation dans l'onglet Monitoring
 - [ ] Alertes CPU/RAM avec notification Windows toast
   - [ ] Définir les seuils dans les paramètres
   - [ ] Déclencher une notification sur dépassement prolongé
