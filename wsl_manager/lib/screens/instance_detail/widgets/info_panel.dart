@@ -44,21 +44,6 @@ class InfoPanel extends ConsumerWidget {
             ports: ports,
           ),
         ),
-        const SizedBox(height: 16),
-        _InfoSection(title: 'Ressources', rows: [
-          _InfoRow(
-            'CPU',
-            data != null
-                ? '${data.cpuPercent.toStringAsFixed(1)} %'
-                : unavailable,
-          ),
-          _InfoRow(
-            'RAM utilisée',
-            data != null
-                ? '${data.ramUsedMb} Mo / ${data.ramTotalMb} Mo'
-                : unavailable,
-          ),
-        ]),
       ],
     );
   }

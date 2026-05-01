@@ -43,49 +43,6 @@ class MonitoringPanel extends ConsumerWidget {
       padding: const EdgeInsets.all(32),
       child: Column(
         children: [
-          Wrap(
-            spacing: 24,
-            runSpacing: 24,
-            alignment: WrapAlignment.center,
-            children: [
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text(
-                        'Processeur',
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(height: 16),
-                      CpuGauge(cpuPercent: data.cpuPercent, radius: 60),
-                    ],
-                  ),
-                ),
-              ),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text(
-                        'Mémoire vive',
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(height: 16),
-                      RamGauge(
-                        usedMb: data.ramUsedMb,
-                        totalMb: data.ramTotalMb,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
           Card(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 18),
@@ -101,6 +58,52 @@ class MonitoringPanel extends ConsumerWidget {
                 ],
               ),
             ),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          'Processeur',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(height: 16),
+                        CpuGauge(cpuPercent: data.cpuPercent, radius: 60),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 24),
+              Expanded(
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          'Mémoire vive',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(height: 16),
+                        RamGauge(
+                          usedMb: data.ramUsedMb,
+                          totalMb: data.ramTotalMb,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
