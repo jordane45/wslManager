@@ -2,6 +2,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:go_router/go_router.dart';
+
 import '../../l10n/app_localizations.dart';
 import '../../models/app_config.dart';
 import '../../providers/config_provider.dart';
@@ -189,6 +191,19 @@ class SettingsScreen extends ConsumerWidget {
                 title: Text(l10n.settingsLaunchAtStartup),
                 value: cfg.launchAtStartup,
                 onChanged: (v) => _save(ref, cfg.copyWith(launchAtStartup: v)),
+              ),
+            ]),
+            const SizedBox(height: 16),
+            _Section(title: 'Administration WSL', children: [
+              ListTile(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.tune_outlined, size: 20),
+                title: const Text('Éditeur .wslconfig global'),
+                subtitle: const Text(
+                    'Limites CPU, RAM, swap pour toutes les instances'),
+                trailing: const Icon(Icons.chevron_right, size: 16),
+                onTap: () => context.go('/settings/wslconfig'),
               ),
             ]),
             const SizedBox(height: 16),

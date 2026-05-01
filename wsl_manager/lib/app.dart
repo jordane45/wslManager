@@ -10,6 +10,7 @@ import 'screens/wizard/create_wizard_screen.dart';
 import 'screens/templates/templates_screen.dart';
 import 'screens/snapshots/snapshots_screen.dart';
 import 'screens/settings/settings_screen.dart';
+import 'screens/settings/wslconfig_editor_screen.dart';
 import 'widgets/app_shell.dart';
 
 final _router = GoRouter(
@@ -29,6 +30,10 @@ final _router = GoRouter(
         GoRoute(
             path: '/snapshots', builder: (_, __) => const SnapshotsScreen()),
         GoRoute(path: '/settings', builder: (_, __) => const SettingsScreen()),
+        GoRoute(
+          path: '/settings/wslconfig',
+          builder: (_, __) => const WslconfigEditorScreen(),
+        ),
       ],
     ),
     GoRoute(path: '/create', builder: (_, __) => const CreateWizardScreen()),
