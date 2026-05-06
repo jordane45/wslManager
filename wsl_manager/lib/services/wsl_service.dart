@@ -314,7 +314,15 @@ class WslService {
   }
 
   Future<void> openInTerminal(String name) async {
-    await Process.run('wt', ['wsl', '-d', name], runInShell: true);
+    final result = await Process.run('wt', ['wsl', '-d', name], runInShell: true);
+    if (result.exitCode != 0) {
+      // Fallback for users without Windows Terminal installed
+      await Process.run(
+        'cmd.exe',
+        ['/c', 'start', '', 'cmd.exe', '/k', 'wsl -d $name'],
+        runInShell: true,
+      );
+    }
   }
 }
 

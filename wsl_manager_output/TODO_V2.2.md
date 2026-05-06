@@ -31,10 +31,10 @@ Ouvrir le chantier V2 avec des fonctionnalités incrémentales, testables et com
 
 ## Priorité 3 - Administration avancée
 
-- [ ] Éditeur `.wslconfig` global
-  - [ ] Localiser le fichier utilisateur Windows
-  - [ ] Éditer les limites CPU/RAM/swap
-  - [ ] Proposer une validation minimale avant sauvegarde
+- [x] Éditeur `.wslconfig` global
+  - [x]  Localiser le fichier utilisateur Windows
+  - [x] Éditer les limites CPU/RAM/swap
+  - [x] Proposer une validation minimale avant sauvegarde
 - [ ] Scripts de démarrage automatique par instance
   - [ ] Stocker les scripts par instance
   - [ ] Exécuter au démarrage de l'instance

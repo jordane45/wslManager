@@ -10,8 +10,17 @@
       "PowerShell(py --version 2>&1)",
       "PowerShell(py -c \"import sys; print\\(sys.executable\\)\" 2>&1)",
       "Bash(flutter analyze *)",
-      "Bash(git tag -a V1.0.1 -m 'WSL Manager V1.0.1 — Correctifs UI *)",
-      "Bash(git push *)"
+      "Bash(git tag -a * -m 'WSL Manager V1.0.1 — Correctifs UI *)",
+      "Bash(git push *)",
+      "Bash(git -C \"c:\\\\_TRAV\\\\_DEV\\\\PERSO\\\\wslManager\" diff --staged)",
+      "Bash(git -C \"c:\\\\_TRAV\\\\_DEV\\\\PERSO\\\\wslManager\" diff)",
+      "Bash(git -C \"c:\\\\_TRAV\\\\_DEV\\\\PERSO\\\\wslManager\" log --oneline -5)",
+      "Bash(git -C \"c:\\\\_TRAV\\\\_DEV\\\\PERSO\\\\wslManager\" add wsl_manager/lib/providers/ports_provider.dart wsl_manager/lib/screens/instance_detail/widgets/info_panel.dart wsl_manager/lib/screens/instance_detail/widgets/monitoring_panel.dart)",
+      "Bash(git -C 'c:\\\\_TRAV\\\\_DEV\\\\PERSO\\\\wslManager' commit -m ' *)",
+      "Bash(git -C \"c:\\\\_TRAV\\\\_DEV\\\\PERSO\\\\wslManager\" add wsl_manager/lib/services/wslconfig_service.dart wsl_manager/lib/screens/settings/wslconfig_editor_screen.dart wsl_manager/lib/screens/settings/settings_screen.dart wsl_manager/lib/app.dart)",
+      "Bash(flutter build *)",
+      "Bash(flutter doctor *)",
+      "Bash(git *)"
     ]
   }
 }
